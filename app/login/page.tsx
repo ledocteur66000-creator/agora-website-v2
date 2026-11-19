@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -19,11 +20,28 @@ function LoginForm() {
     setLoading(true);
 
     try {
-      await account.createEmailPasswordSession(email.trim(), password);
+      // Vérifier si une session existe déjà
+      try {
+        await account.get();
+        router.replace("/profil");
+        return;
+      } catch {
+        // Aucune session active : continuer
+      }
+
+      // Créer une nouvelle session
+      await account.createEmailPasswordSession(
+        email.trim(),
+        password
+      );
+
       router.replace("/profil");
+
     } catch (error: unknown) {
       setMessage(
-        error instanceof Error ? error.message : "Connexion impossible."
+        error instanceof Error
+          ? error.message
+          : "Connexion impossible."
       );
     } finally {
       setLoading(false);
@@ -42,10 +60,16 @@ function LoginForm() {
         </div>
 
         <h1>Content de te revoir.</h1>
-        <p className="muted">Connecte-toi à ton identité AGORA.</p>
+
+        <p className="muted">
+          Connecte-toi à ton identité AGORA.
+        </p>
 
         <form onSubmit={connecter}>
-          <label htmlFor="email">Adresse e-mail</label>
+          <label htmlFor="email">
+            Adresse e-mail
+          </label>
+
           <input
             id="email"
             type="email"
@@ -55,7 +79,10 @@ function LoginForm() {
             required
           />
 
-          <label htmlFor="password">Mot de passe</label>
+          <label htmlFor="password">
+            Mot de passe
+          </label>
+
           <input
             id="password"
             type="password"
@@ -65,15 +92,26 @@ function LoginForm() {
             required
           />
 
-          <button className="button primary full" type="submit" disabled={loading}>
+          <button
+            className="button primary full"
+            type="submit"
+            disabled={loading}
+          >
             {loading ? "Connexion…" : "Se connecter"}
           </button>
         </form>
 
-        {message && <p className="notice" role="status">{message}</p>}
+        {message && (
+          <p className="notice" role="status">
+            {message}
+          </p>
+        )}
 
         <p className="switch-auth">
-          Pas encore membre ? <Link href="/inscription">Créer un compte</Link>
+          Pas encore membre ?{" "}
+          <Link href="/inscription">
+            Créer un compte
+          </Link>
         </p>
       </section>
     </main>
@@ -82,7 +120,13 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<main className="auth-layout">Chargement d'AGORA ID…</main>}>
+    <Suspense
+      fallback={
+        <main className="auth-layout">
+          Chargement d'AGORA ID…
+        </main>
+      }
+    >
       <LoginForm />
     </Suspense>
   );
